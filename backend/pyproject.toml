@@ -1,0 +1,27 @@
+[project]
+name = "rag-langchain"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.136.3",
+    "google-auth>=2.53.0",
+    "google-genai>=2.7.0",
+    "ipykernel>=7.2.0",
+    "langchain>=1.3.2",
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.4.0",
+    "langchain-text-splitters>=1.1.2",
+    "psycopg[binary]>=3.3.4",
+    "pydantic>=2.13.4",
+    "pyjwt>=2.13.0",
+    "pymupdf>=1.27.2.3",
+    "pypdf>=6.12.2",
+    "python-dotenv>=1.2.2",
+    "python-multipart>=0.0.30",
+    "sqlalchemy>=2.0.50",
+    "uvicorn>=0.48.0",
+]
