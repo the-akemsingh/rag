@@ -239,8 +239,8 @@ export default function ChatComponent() {
   const showChat = uploadPhase === "ready";
 
   return (
-    /* No pt-20 — navbar is gone for authenticated users */
     <div className="flex h-screen bg-white dark:bg-[#0b0d17] text-slate-800 dark:text-zinc-100 transition-colors duration-300">
+      <input ref={fileInputRef} id="document-upload" type="file" accept={getDocumentAcceptAttribute()} className="sr-only" disabled={uploadPhase === "uploading"} onChange={handleFileChange} multiple />
       <ChatSidebar
         key={sidebarKey}
         activeChat={activeChat}
@@ -341,7 +341,6 @@ export default function ChatComponent() {
                       Browse files
                     </span>
                   </label>
-                  <input ref={fileInputRef} id="document-upload" type="file" accept={getDocumentAcceptAttribute()} className="sr-only" disabled={uploadPhase === "uploading"} onChange={handleFileChange} multiple />
                   {uploadError && <p className="mt-3 text-sm text-red-500 dark:text-red-400" role="alert">{uploadError}</p>}
                   <div className="mt-5 flex justify-end">
                     <button
@@ -450,93 +449,15 @@ export default function ChatComponent() {
                               <svg className="h-4.5 w-4.5 text-slate-400 group-hover:text-slate-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
                               </svg>
-                              <span>Add photos & files</span>
+                              <span>Add files</span>
                             </div>
                             <span className="text-[10px] opacity-50 font-normal">Ctrl + U</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setShowMenu(false)}
-                            className="flex items-center justify-between w-full px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-white/10 dark:hover:bg-white/5 transition text-left cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <svg className="h-4.5 w-4.5 text-slate-400 group-hover:text-slate-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                              </svg>
-                              <span>Recent files</span>
-                            </div>
-                            <span className="text-xs opacity-50 font-normal">&gt;</span>
-                          </button>
-
-                          <div className="h-px bg-white/10 dark:bg-white/5 my-1" />
-
-                          <button
-                            type="button"
-                            onClick={() => setShowMenu(false)}
-                            className="flex items-center gap-3 w-full px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-white/10 dark:hover:bg-white/5 transition text-left cursor-pointer group"
-                          >
-                            <svg className="h-4.5 w-4.5 text-slate-400 group-hover:text-slate-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                            </svg>
-                            <span>Create image</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setShowMenu(false)}
-                            className="flex items-center gap-3 w-full px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-white/10 dark:hover:bg-white/5 transition text-left cursor-pointer group"
-                          >
-                            <svg className="h-4.5 w-4.5 text-slate-400 group-hover:text-slate-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.467 5.99 5.99 0 0 0-1.925 3.546 5.974 5.974 0 0 1-2.133-1A3.75 3.75 0 0 0 12 18Z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25V4.5m0 15v2.25M4.22 4.22l1.59 1.59m12.38 12.38 1.59 1.59M2.25 12h2.25m15 0h2.25m-18.38 6.19 1.59-1.59M18.19 5.81l1.59-1.59" />
-                            </svg>
-                            <span>Thinking</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setShowMenu(false)}
-                            className="flex items-center gap-3 w-full px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-white/10 dark:hover:bg-white/5 transition text-left cursor-pointer group"
-                          >
-                            <svg className="h-4.5 w-4.5 text-slate-400 group-hover:text-slate-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 15.75 20.25 20.25M17.25 10.75a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" />
-                            </svg>
-                            <span>Deep research</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => setShowMenu(false)}
-                            className="flex items-center gap-3 w-full px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-white/10 dark:hover:bg-white/5 transition text-left cursor-pointer group"
-                          >
-                            <svg className="h-4.5 w-4.5 text-slate-400 group-hover:text-slate-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A11.952 11.952 0 0 1 12 16.5c-2.998 0-5.74-1.1-7.843-2.918m0 0A8.959 8.959 0 0 1 3 12c0-.778.099-1.533.284-2.253" />
-                            </svg>
-                            <span>Web search</span>
-                          </button>
-
-                          <div className="h-px bg-white/10 dark:bg-white/5 my-1" />
-
-                          <button
-                            type="button"
-                            onClick={() => setShowMenu(false)}
-                            className="flex items-center justify-between w-full px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-white/10 dark:hover:bg-white/5 transition text-left cursor-pointer group"
-                          >
-                            <div className="flex items-center gap-3">
-                              <svg className="h-4.5 w-4.5 text-slate-400 group-hover:text-slate-200" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                              </svg>
-                              <span>More</span>
-                            </div>
-                            <span className="text-xs opacity-50 font-normal">&gt;</span>
                           </button>
                         </div>
                       )}
 
                       <form onSubmit={handleSendMessage} className="flex items-center gap-3 bg-white dark:bg-[#161828] border border-slate-200 dark:border-white/10 rounded-full px-4 py-2.5 shadow-lg hover:shadow-xl dark:shadow-black/40 dark:hover:shadow-black/50 transition-all duration-300 w-full">
 
-                        {/* Plus Add Button */}
                         <button
                           type="button"
                           onClick={() => setShowMenu((prev) => !prev)}
@@ -556,40 +477,6 @@ export default function ChatComponent() {
                           disabled={isSending || !wsConnected}
                           className="flex-1 bg-transparent border-0 outline-none text-base px-2 py-1 placeholder-slate-400 dark:placeholder-zinc-500 text-slate-800 dark:text-zinc-100 focus:ring-0 focus:outline-none"
                         />
-
-                        {/* Connection status indicator */}
-                        <span
-                          title={wsConnected ? "Connected" : "Reconnecting..."}
-                          className={`h-2.5 w-2.5 rounded-full shrink-0 ${wsConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400 animate-pulse"
-                            }`}
-                        />
-
-                        {/* Sparkle Button */}
-                        <button type="button" title="Create" className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer">
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l5.096-.813a2 2 0 001.077-.543l5.824-5.824a2.002 2.002 0 00-2.83-2.83l-5.824 5.824a2 2 0 00-.543 1.077L9.813 15.904z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 11.5l2-2m-10.5 8L12 16" />
-                          </svg>
-                        </button>
-
-                        {/* Mic Button */}
-                        <button type="button" title="Voice input" className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/5 transition cursor-pointer">
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3z" />
-                          </svg>
-                        </button>
-
-                        {/* Direct File Attachment button */}
-                        <button
-                          type="button"
-                          title="Attach file"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition cursor-pointer"
-                        >
-                          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
-                          </svg>
-                        </button>
 
                         {/* Send Button */}
                         <button
