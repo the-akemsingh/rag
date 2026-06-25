@@ -5,8 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import get_db
 from db.models import Chat, Document, Message
 from dependencies import decode_jwt, resolve_user
-from services.llm_call import getEmbeddings, generateAnswer
-from services.chromadb import search_embeddings
+from services.LangGraph import agent
 
 router = APIRouter(tags=["websocket"])
 
@@ -61,18 +60,13 @@ async def websocket_chat(
             )
             db.add(user_msg)
             await db.commit()
-
-            embeddings = getEmbeddings([user_message])
-            if not embeddings or not embeddings[0].values:
-                await websocket.send_json({"error": "Embedding generation failed"})
-                continue
-
-            vector = embeddings[0].values
-
-            search_result = search_embeddings(vector, document_ids)
-            context = "\n\n".join(search_result["documents"][0])
-
-            answer = await generateAnswer(context, user_message)
+            
+            graph_result = await agent.ainvoke({
+                "userMessage":user_message,
+                "document_ids":document_ids
+            })
+            
+            answer = graph_result["llmResponse"]
 
             assistant_msg = Message(
                 id=str(uuid.uuid4()),

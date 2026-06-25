@@ -1,27 +1,42 @@
 import os
 from google import genai
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
+
+groqClient = OpenAI(
+    api_key=os.getenv("GROQ_API_KEY"), base_url="https://api.groq.com/openai/v1"
+)
+
+# response = client.chat.completions.create(
+#     model="llama-3.3-70b-versatile",
+#     messages=[
+#         {"role": "user", "content": prompt}
+#     ]
+# )
+
+
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
 
 def getChatResponse(userInput: str):
     return client.models.generate_content(
-        model="gemini-2.5-flash-lite",
-        contents=userInput
+        model="gemini-2.5-flash-lite", contents=userInput
     )
 
-def getEmbeddings(content: list[str]):
+
+async def getEmbeddings(content: list[str]):
     embeddings = []
     for text in content:
         response = client.models.embed_content(
-            model="gemini-embedding-2",
-            contents=text
+            model="gemini-embedding-2", contents=text
         )
         if response.embeddings:
             embeddings.append(response.embeddings[0])
     return embeddings
+
 
 async def generateAnswer(context: str, question: str):
     prompt = f"""You are **Raggy**, an intelligent and helpful AI assistant built by Akem. \
@@ -47,8 +62,7 @@ You answer user questions strictly based on the retrieved context provided below
 ### User Question
 {question}
 """
-    response = client.models.generate_content(
-        model="gemini-3.5-flash",
-        contents=prompt
+    response = groqClient.chat.completions.create(
+        model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}]
     )
-    return response.text
+    return response.choices[0].message.content

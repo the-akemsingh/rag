@@ -28,12 +28,12 @@ def addEmbeddingDataToCollection(embeddingsData: list[Embedded_Data]) -> bool:
         )
     return True
 
-def search_embeddings(vector: list[float], document_ids: list[str]):
+async def search_embeddings(vector: list[float], document_ids: list[str]):
     search = (
         Search()
         .where({"document_id": {"$in": document_ids}})
         .limit(5)
-        .select(K.DOCUMENT, K.SCORE)
+        .select(K.DOCUMENT, K.SCORE,K.METADATA)
     )
     collection = getCollection()
     return collection.search(search.rank(Knn(query=vector)))
