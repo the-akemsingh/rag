@@ -95,6 +95,7 @@ async def get_messages(
             "role": m.role,
             "content": m.content,
             "created_at": m.created_at,
+            "is_clarification": m.is_clarification,
             "status": docs[m.content].status if (m.role == "document" and m.content in docs) else "indexed"
         }
         for m in messages

@@ -9,12 +9,13 @@ from services.LangGraph import agent
 
 router = APIRouter(tags=["websocket"])
 
+
 @router.websocket("/ws/chat/{chat_id}")
 async def websocket_chat(
     websocket: WebSocket,
     chat_id: str,
     token: str = Query(...),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
     await websocket.accept()
 
@@ -64,7 +65,7 @@ async def websocket_chat(
             history_item["document_name"] = message.content
 
         chat_history.append(history_item)
-    
+
     try:
         while True:
             data = await websocket.receive_json()
@@ -73,32 +74,53 @@ async def websocket_chat(
                 continue
 
             user_msg = Message(
-                id=str(uuid.uuid4()),
-                chat_id=chat_id,
-                role="user",
-                content=user_message
+                id=str(uuid.uuid4()), chat_id=chat_id, role="user", content=user_message
             )
             db.add(user_msg)
             await db.commit()
-            
-            graph_result = await agent.ainvoke({
-                "user_query":user_message,
-                "document_ids":document_ids,
-                "chat_history": chat_history,
-            })
-            
-            answer = graph_result["llmResponse"]
 
-            assistant_msg = Message(
-                id=str(uuid.uuid4()),
-                chat_id=chat_id,
-                role="assistant",
-                content=answer
+            graph_result = await agent.ainvoke(
+                {
+                    "user_query": user_message,
+                    "document_ids": document_ids,
+                    "chat_history": chat_history,
+                }
             )
-            db.add(assistant_msg)
-            await db.commit()
 
-            await websocket.send_json({"response": answer})
+            if graph_result.get("clarification_needed"):
+                clarification_q = graph_result["clarification_question"]
+
+                assistant_msg = Message(
+                    id=str(uuid.uuid4()),
+                    chat_id=chat_id,
+                    role="assistant",
+                    content=clarification_q,
+                    is_clarification=True,
+                )
+                db.add(assistant_msg)
+                await db.commit()
+                chat_history.append({"role": "assistant", "content": clarification_q})
+
+                await websocket.send_json(
+                    {
+                        "response": clarification_q,
+                        "type": "clarification",
+                    }
+                )
+
+            else:
+                answer = graph_result["llmResponse"]
+
+                assistant_msg = Message(
+                    id=str(uuid.uuid4()),
+                    chat_id=chat_id,
+                    role="assistant",
+                    content=answer,
+                )
+                db.add(assistant_msg)
+                await db.commit()
+
+                await websocket.send_json({"response": answer})
 
     except WebSocketDisconnect:
         pass

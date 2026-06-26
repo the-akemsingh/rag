@@ -26,3 +26,6 @@ class GraphState(TypedDict):
     llmResponse: NotRequired[str]
     retrieval_attempts: NotRequired[int]
     rewrite_query_attempts: NotRequired[int]
+    confidence: NotRequired[float]
+    clarification_needed: NotRequired[bool]
+    clarification_question: NotRequired[str]

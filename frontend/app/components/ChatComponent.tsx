@@ -14,6 +14,7 @@ type ChatEntry = {
   role: "user" | "assistant" | "document";
   content: string;
   status?: "pending" | "indexing" | "indexed" | "failed";
+  isClarification?: boolean;
 };
 
 type UploadPhase = "idle" | "uploading" | "ready" | "error";
@@ -116,9 +117,9 @@ export default function ChatComponent() {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.json())
-      .then((data: { id: string; role: "user" | "assistant" | "document"; content: string; status?: "pending" | "indexing" | "indexed" | "failed" }[]) => {
+      .then((data: { id: string; role: "user" | "assistant" | "document"; content: string; status?: "pending" | "indexing" | "indexed" | "failed"; is_clarification?: boolean }[]) => {
         if (Array.isArray(data) && data.length > 0) {
-          setMessages(data.map((m) => ({ id: m.id, role: m.role, content: m.content, status: m.status })));
+          setMessages(data.map((m) => ({ id: m.id, role: m.role, content: m.content, status: m.status, isClarification: m.is_clarification })));
           const firstDoc = data.find((m) => m.role === "document");
           if (firstDoc) {
             setUploadPhase("ready");
@@ -141,13 +142,13 @@ export default function ChatComponent() {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((r) => r.json())
-        .then((data: { id: string; role: "user" | "assistant" | "document"; content: string; status?: "pending" | "indexing" | "indexed" | "failed" }[]) => {
+        .then((data: { id: string; role: "user" | "assistant" | "document"; content: string; status?: "pending" | "indexing" | "indexed" | "failed"; is_clarification?: boolean }[]) => {
           if (Array.isArray(data)) {
-            const newMsgs = data.map((m) => ({ id: m.id, role: m.role, content: m.content, status: m.status }));
-            // Only update messages state if some status values have actually changed
+            const newMsgs = data.map((m) => ({ id: m.id, role: m.role, content: m.content, status: m.status, isClarification: m.is_clarification }));
+            // Only update messages state if some status/clarification values have actually changed
             const isDifferent = newMsgs.some((m, idx) => {
               const prev = messages[idx];
-              return !prev || prev.id !== m.id || prev.status !== m.status;
+              return !prev || prev.id !== m.id || prev.status !== m.status || prev.isClarification !== m.isClarification;
             });
             if (isDifferent) {
               setMessages(newMsgs);
@@ -168,7 +169,15 @@ export default function ChatComponent() {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.error) { setChatError(data.error); setIsSending(false); return; }
-      setMessages((prev) => [...prev, { id: createId(), role: "assistant", content: data.response ?? "" }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: createId(),
+          role: "assistant",
+          content: data.response ?? "",
+          isClarification: data.type === "clarification",
+        }
+      ]);
       setIsSending(false);
       scrollChatToBottom();
     };
@@ -440,7 +449,19 @@ export default function ChatComponent() {
 
                             /* Assistant bubble */
                           ) : (
-                            <div className="max-w-[85%] md:max-w-[72%] rounded-2xl rounded-bl-sm border border-slate-200/80 dark:border-white/8 bg-white dark:bg-[#161828] px-4 py-3 md:px-5 md:py-4 text-sm md:text-base leading-relaxed shadow-sm transition-colors">
+                            <div className={`max-w-[85%] md:max-w-[72%] rounded-2xl rounded-bl-sm border px-4 py-3 md:px-5 md:py-4 text-sm md:text-base leading-relaxed shadow-sm transition-all duration-300 ${
+                              entry.isClarification
+                                ? "border-amber-400/50 dark:border-amber-500/30 bg-amber-50/20 dark:bg-amber-500/5 shadow-amber-500/5"
+                                : "border-slate-200/80 dark:border-white/8 bg-white dark:bg-[#161828]"
+                            }`}>
+                              {entry.isClarification && (
+                                <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-amber-600 dark:text-amber-400 select-none animate-pulse">
+                                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                                  </svg>
+                                  <span>Clarification Request</span>
+                                </div>
+                              )}
                               <AssistantMessage content={entry.content} />
                             </div>
                           )}

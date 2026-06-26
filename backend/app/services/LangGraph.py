@@ -17,6 +17,9 @@ from utils.llm import langchainLlm
 
 class GraderOutput(BaseModel):
     relevant_indexes: list[int]
+    confidence: float  # 0.0 to 1.0
+    clarification_needed: bool
+    clarification_question: str
 
 
 grade_prompt = ChatPromptTemplate.from_template(GRADER_TEMPLATE)
@@ -61,7 +64,12 @@ async def retrieve(state: GraphState):
 async def document_grader(state: GraphState):
     retrieved_docs = state.get("retrieved_docs")
     if not retrieved_docs:
-        return {"relevant_docs": []}
+        return {
+            "relevant_docs": [],
+            "confidence": 0.0,
+            "clarification_needed": True,
+            "clarification_question": "I couldn't find any relevant content. Could you clarify what you're looking for?",
+        }
 
     relevantDocs = []
     context_parts = []
@@ -89,7 +97,12 @@ async def document_grader(state: GraphState):
             if 0 <= idx < len(retrieved_docs):
                 relevantDocs.append(retrieved_docs[idx])
 
-    return {"relevant_docs": relevantDocs}
+    return {
+        "relevant_docs": relevantDocs,
+        "confidence": graderReponse.confidence,
+        "clarification_needed": graderReponse.clarification_needed,
+        "clarification_question": graderReponse.clarification_question,
+    }
 
 
 async def generate_llm_response(state: GraphState):
@@ -117,19 +130,26 @@ async def generate_llm_response(state: GraphState):
 #  conditional edge node
 def route_after_grading(state: GraphState):
     relevant_docs = state.get("relevant_docs")
-    if relevant_docs:
+    confidence = state.get("confidence", 0.0)
+    clarification_needed = state.get("clarification_needed", False)
+
+    if relevant_docs and confidence >= 0.7:
         return "generate_llm_response"
 
+    if relevant_docs and confidence < 0.7:
+        if state.get("rewrite_query_attempts", 0) >= 1:
+            return "generate_llm_response"
+        return "rewrite_query"
+
     if state.get("rewrite_query_attempts", 0) >= 1:
-        return "no_answer"
+        return "ask_clarification"
 
-    return "rewrite_query"
+    if clarification_needed:
+        if state.get("rewrite_query_attempts", 0) >= 1:
+            return "ask_clarification"
+        return "rewrite_query"
 
-
-def no_answer(state: GraphState):
-    return {
-        "llmResponse": "Sorry, I don't have enough information in the provided documents to answer that question."
-    }
+    return "ask_clarification"
 
 
 async def rewrite_query(state: GraphState):
@@ -149,6 +169,14 @@ async def rewrite_query(state: GraphState):
         # "relevant_docs": [],
     }
 
+def ask_clarification(state: GraphState):
+    return {
+        "clarification_needed": True,
+        "clarification_question": state.get(
+            "clarification_question",
+            "Could you provide more details about your question?",
+        ),
+    }
 
 #  workflow
 agent_builder = StateGraph(GraphState)
@@ -159,7 +187,7 @@ agent_builder.add_node("retrieve", retrieve)
 agent_builder.add_node("document_grader", document_grader)
 agent_builder.add_node("generate_llm_response", generate_llm_response)
 agent_builder.add_node("rewrite_query", rewrite_query)
-agent_builder.add_node("no_answer", no_answer)
+agent_builder.add_node("ask_clarification", ask_clarification)
 
 
 agent_builder.add_edge(start_key="embed_user_query", end_key="retrieve")
@@ -171,13 +199,13 @@ agent_builder.add_conditional_edges(
     {
         "generate_llm_response": "generate_llm_response",
         "rewrite_query": "rewrite_query",
-        "no_answer": "no_answer",
+        "ask_clarification": "ask_clarification",
     },
 )
 
 agent_builder.add_edge(start_key="rewrite_query", end_key="embed_user_query")
 agent_builder.add_edge("generate_llm_response", END)
-agent_builder.add_edge("no_answer", END)
+agent_builder.add_edge("ask_clarification", END)
 
 
 agent = agent_builder.compile()
