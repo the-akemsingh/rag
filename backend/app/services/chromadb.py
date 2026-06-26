@@ -1,16 +1,7 @@
-import os
-import chromadb
-from dotenv import load_dotenv
-from services.models import Embedded_Data
+from models.embedded_data import Embedded_Data
 from chromadb import Search, K, Knn
+from utils.chromadb import client
 
-load_dotenv()
-
-client = chromadb.CloudClient(
-    api_key=os.getenv("CHROMA_API_KEY"),
-    tenant=os.getenv("CHROMA_TENANT"),
-    database=os.getenv("CHROMA_DATABASE")
-)
 
 def getCollection():
     return client.get_or_create_collection(name="document_embeddings", embedding_function=None)

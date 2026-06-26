@@ -2,9 +2,9 @@ import os
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from services.llm_call import getEmbeddings
+from services.get_embeddings import getEmbeddings
 from services.chromadb import addEmbeddingDataToCollection
-from services.models import Embedded_Data
+from models.embedded_data import Embedded_Data
 from utils.load_xlsx import load_xlsx
 from utils.load_xls import load_xls
 from utils.load_pptx import load_pptx

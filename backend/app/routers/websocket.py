@@ -82,7 +82,7 @@ async def websocket_chat(
             await db.commit()
             
             graph_result = await agent.ainvoke({
-                "userMessage":user_message,
+                "user_query":user_message,
                 "document_ids":document_ids,
                 "chat_history": chat_history,
             })
