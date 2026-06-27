@@ -131,25 +131,17 @@ async def generate_llm_response(state: GraphState):
 def route_after_grading(state: GraphState):
     relevant_docs = state.get("relevant_docs")
     confidence = state.get("confidence", 0.0)
-    clarification_needed = state.get("clarification_needed", False)
+    attempts = state.get("rewrite_query_attempts", 0)
 
     if relevant_docs and confidence >= 0.7:
         return "generate_llm_response"
 
-    if relevant_docs and confidence < 0.7:
-        if state.get("rewrite_query_attempts", 0) >= 1:
+    if attempts >= 1:
+        if relevant_docs:
             return "generate_llm_response"
-        return "rewrite_query"
-
-    if state.get("rewrite_query_attempts", 0) >= 1:
         return "ask_clarification"
 
-    if clarification_needed:
-        if state.get("rewrite_query_attempts", 0) >= 1:
-            return "ask_clarification"
-        return "rewrite_query"
-
-    return "ask_clarification"
+    return "rewrite_query"
 
 
 async def rewrite_query(state: GraphState):
