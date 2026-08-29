@@ -25,7 +25,7 @@ const calSans = localFont({
 
 export const metadata: Metadata = {
   title: "AskDocs — Chat with your documents",
-  description: "Upload documents and chat with your knowledge base using advanced RAG",
+  description: "Upload documents and  chat with your knowledge base using advanced RAG",
 };
 
 export default function RootLayout({
