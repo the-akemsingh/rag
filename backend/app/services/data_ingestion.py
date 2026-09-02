@@ -1,14 +1,45 @@
 import os
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
-from services.get_embeddings import getEmbeddings
-from services.chromadb import addEmbeddingDataToCollection
-from models.embedded_data import Embedded_Data
-from utils.load_xlsx import load_xlsx
-from utils.load_xls import load_xls
-from utils.load_pptx import load_pptx
 
+from app.db.database import SessionLocal
+from app.models.embedded_data import Embedded_Data
+from app.services.chromadb import addEmbeddingDataToCollection
+from app.services.get_embeddings import getEmbeddings
+from app.utils.load_pptx import load_pptx
+from app.utils.load_xls import load_xls
+from app.utils.load_xlsx import load_xlsx
+from langchain_community.document_loaders import (
+    CSVLoader,
+    Docx2txtLoader,
+    PyPDFLoader,
+    TextLoader,
+)
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from sqlalchemy import select
+
+
+async def process_document_in_background(doc_id: str, filepath: str):
+    from app.db.models import Document
+
+    async with SessionLocal() as db:
+        stmt = select(Document).where(Document.id == doc_id)
+        result = await db.execute(stmt)
+        doc = result.scalar_one_or_none()
+        if not doc:
+            return
+        
+        doc.status = "indexing"
+        await db.commit()
+
+        try:
+            await process_document(filepath, doc_id)
+            doc.status = "indexed"
+            doc.is_embedded = True
+            await db.commit()
+        except Exception as e:
+            print(f"Error processing document {doc.document_name} in background: {e}")
+            doc.status = "failed"
+            await db.commit()
 
 async def process_document(filepath: str, document_id: str):
     chunks = fileChunkHandler(filepath=filepath)    
@@ -28,8 +59,6 @@ def fileChunkHandler(filepath: str) -> list[Document]:
         loader = PyPDFLoader(filepath)
         file = loader.load()
     elif ext == ".docx":
-        from langchain_community.document_loaders import Docx2txtLoader
-
         loader = Docx2txtLoader(filepath)
         file = loader.load()
     elif ext == ".doc":
@@ -47,19 +76,15 @@ def fileChunkHandler(filepath: str) -> list[Document]:
             "Legacy PowerPoint .ppt format is not supported directly. Please convert it to .pptx and re-upload."
         )
     elif ext == ".txt":
-        from langchain_community.document_loaders import TextLoader
-
         loader = TextLoader(filepath, encoding="utf-8")
         file = loader.load()
     elif ext == ".csv":
-        from langchain_community.document_loaders import CSVLoader
-
         loader = CSVLoader(filepath)
         file = loader.load()
     else:
         raise ValueError(f"Unsupported file format: {ext}")
 
-    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     return splitter.split_documents(file)
 
 
@@ -88,28 +113,3 @@ async def generate_document_embeddings(
             )
         )
     return document_embeddings
-
-async def process_document_in_background(doc_id: str, filepath: str):
-    from db.database import SessionLocal
-    from db.models import Document
-    from sqlalchemy import select
-
-    async with SessionLocal() as db:
-        stmt = select(Document).where(Document.id == doc_id)
-        result = await db.execute(stmt)
-        doc = result.scalar_one_or_none()
-        if not doc:
-            return
-        
-        doc.status = "indexing"
-        await db.commit()
-
-        try:
-            await process_document(filepath, doc_id)
-            doc.status = "indexed"
-            doc.is_embedded = True
-            await db.commit()
-        except Exception as e:
-            print(f"Error processing document {doc.document_name} in background: {e}")
-            doc.status = "failed"
-            await db.commit()

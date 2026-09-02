@@ -1,13 +1,14 @@
 import os
+
 import jwt
+from app.db.database import get_db
+from app.db.models import User
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-from google.oauth2 import id_token
 from google.auth.transport import requests
+from google.oauth2 import id_token
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.database import get_db
-from db.models import User
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -15,7 +16,7 @@ class GoogleAuthRequest(BaseModel):
     token: str
 
 @router.post("/google")
-async def googleAuth(payload: GoogleAuthRequest, db: AsyncSession = Depends(get_db)):
+async def googleAuth(payload: GoogleAuthRequest, db: AsyncSession = Depends(get_db)):  # noqa: B008
     google_client_id = os.getenv("GOOGLE_CLIENT_ID")
     jwt_secret = os.getenv("JWT_SECRET")
     
@@ -30,7 +31,7 @@ async def googleAuth(payload: GoogleAuthRequest, db: AsyncSession = Depends(get_
         token_info = id_token.verify_oauth2_token(
             payload.token, requests.Request(), google_client_id
         )
-    except Exception as e:
+    except ValueError as e:
         raise HTTPException(400, f"Invalid Google token: {e}")
 
     email = token_info.get("email")

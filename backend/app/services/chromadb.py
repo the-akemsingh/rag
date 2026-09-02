@@ -1,6 +1,6 @@
-from models.embedded_data import Embedded_Data
-from chromadb import Search, K, Knn
-from utils.chromadb import client
+from app.models.embedded_data import Embedded_Data
+from app.utils.chromadb import client
+from chromadb import K, Knn, Search
 
 
 def getCollection():

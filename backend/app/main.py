@@ -1,16 +1,17 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-from routers.auth import router as auth_router
-from routers.chats import router as chats_router
-from routers.websocket import router as ws_router
 import asyncio
 import os
-from sqlalchemy import select
-from db.database import SessionLocal
-from db.models import Document
-from services.data_ingestion import process_document
 from contextlib import asynccontextmanager
+
+from app.db.database import SessionLocal
+from app.db.models import Document
+from app.routers.auth import router as auth_router
+from app.routers.chats import router as chats_router
+from app.routers.websocket import router as ws_router
+from app.services.data_ingestion import process_document
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
 
 load_dotenv()
 
@@ -43,7 +44,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(chats_router)
 app.include_router(ws_router)
-
+# TODO: a route to get the state of a particular document by its id
 
 @app.get("/")
 def info():
@@ -65,19 +66,18 @@ async def retry_failed_documents():
 
                     for filename in os.listdir("uploads"):
                         file_path = os.path.join("uploads", filename)
-                        if os.path.isfile(file_path):
-                            if filename not in db_filenames:
-                                file_age = time.time() - os.path.getmtime(file_path)
-                                if file_age > 60:
-                                    try:
-                                        os.remove(file_path)
-                                        print(
-                                            f"Removed unused upload file: {filename} (not found in database)"
-                                        )
-                                    except Exception as err:
-                                        print(
-                                            f"Error deleting unused file {filename}: {err}"
-                                        )
+                        if os.path.isfile(file_path) and filename not in db_filenames:
+                            file_age = time.time() - os.path.getmtime(file_path)
+                            if file_age > 60:
+                                try:
+                                    os.remove(file_path)
+                                    print(
+                                        f"Removed unused upload file: {filename} (not found in database)"
+                                    )
+                                except OSError as err:
+                                    print(
+                                        f"Error deleting unused file {filename}: {err}"
+                                    )
 
                 stmt = select(Document).where(
                     Document.status == "failed", Document.is_embedded == False

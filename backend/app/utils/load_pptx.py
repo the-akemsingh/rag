@@ -1,5 +1,6 @@
 from langchain_core.documents import Document
 
+
 def load_pptx(filepath: str) -> list[Document]:
     from pptx import Presentation
     prs = Presentation(filepath)

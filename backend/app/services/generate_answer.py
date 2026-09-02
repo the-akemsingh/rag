@@ -1,4 +1,5 @@
-from utils.llm import langchainLlm
+from app.utils.llm import langchainLlm
+
 
 async def generateAnswer(context: str, question: str):
     prompt = f"""You are **Raggy**, an intelligent and helpful AI assistant built by Akem. \
@@ -24,6 +25,5 @@ You answer user questions strictly based on the retrieved context provided below
 ### User Question
 {question}
 """
-    response = await langchainLlm.ainvoke(prompt)
-    return response.content
-
+    async for chunk in langchainLlm.astream(prompt):
+        yield chunk.content

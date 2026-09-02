@@ -1,4 +1,5 @@
-from utils.llm import langchainEmbeddings
+from app.utils.llm import langchainEmbeddings
+
 
 class EmbeddingResult:
     def __init__(self, values: list[float]):

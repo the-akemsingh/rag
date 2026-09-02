@@ -1,11 +1,12 @@
 import uuid
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, Depends
+
+from app.db.database import get_db
+from app.db.models import Chat, Document, Message
+from app.dependencies import decode_jwt
+from app.services.LangGraph import agent
+from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.database import get_db
-from db.models import Chat, Document, Message
-from dependencies import decode_jwt, resolve_user
-from services.LangGraph import agent
 
 router = APIRouter(tags=["websocket"])
 
@@ -26,9 +27,9 @@ async def websocket_chat(
         await websocket.close(code=1008)
         return
 
-    user = await resolve_user(payload, db)
-
-    chat_stmt = select(Chat).where(Chat.id == chat_id, Chat.user_id == user.id)
+    chat_stmt = select(Chat).where(
+        Chat.id == chat_id, Chat.user_id == payload["userId"]
+    )
     chat_result = await db.execute(chat_stmt)
     chat = chat_result.scalar_one_or_none()
     if not chat:
@@ -109,18 +110,21 @@ async def websocket_chat(
                 )
 
             else:
-                answer = graph_result["llmResponse"]
+                answer_stream = graph_result["llmResponse"]
+                full_answer = ""
+
+                async for chunk in answer_stream:
+                    full_answer += chunk
+                    await websocket.send_json({"response": chunk, "type": "stream"})
 
                 assistant_msg = Message(
                     id=str(uuid.uuid4()),
                     chat_id=chat_id,
                     role="assistant",
-                    content=answer,
+                    content=full_answer,
                 )
                 db.add(assistant_msg)
                 await db.commit()
-
-                await websocket.send_json({"response": answer})
 
     except WebSocketDisconnect:
         pass

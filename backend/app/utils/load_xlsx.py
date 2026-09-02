@@ -1,5 +1,6 @@
 from langchain_core.documents import Document
 
+
 def load_xlsx(filepath: str) -> list[Document]:
     import openpyxl
     wb = openpyxl.load_workbook(filepath, data_only=True)

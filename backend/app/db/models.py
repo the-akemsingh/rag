@@ -1,6 +1,6 @@
-from sqlalchemy import ForeignKey, Text, DateTime, func
+from app.db.database import Base
+from sqlalchemy import DateTime, ForeignKey, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
-from db.database import Base
 
 
 class User(Base):

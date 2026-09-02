@@ -1,4 +1,4 @@
-from utils.llm import langchainLlm
+from app.utils.llm import langchainLlm
 
 
 async def rewrite_query_service(context: str, question: str):

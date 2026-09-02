@@ -1,18 +1,15 @@
-from services.get_embeddings import getEmbeddings
-from services.generate_answer import generateAnswer
-from services.chromadb import search_embeddings
-from services.rewrite_query import rewrite_query_service
-from services.GRADER_TEMPLATE import GRADER_TEMPLATE
-
-from langchain_core.prompts import ChatPromptTemplate
-from langgraph.graph import StateGraph
-from langgraph.graph import START, END
-
-from pydantic import BaseModel
 from typing import cast
-from models.graph_state import GraphState
 
-from utils.llm import langchainLlm
+from app.models.graph_state import GraphState
+from app.services.chromadb import search_embeddings
+from app.services.generate_answer import generateAnswer
+from app.services.get_embeddings import getEmbeddings
+from app.services.GRADER_TEMPLATE import GRADER_TEMPLATE
+from app.services.rewrite_query import rewrite_query_service
+from app.utils.llm import langchainLlm
+from langchain_core.prompts import ChatPromptTemplate
+from langgraph.graph import END, START, StateGraph
+from pydantic import BaseModel
 
 
 class GraderOutput(BaseModel):
@@ -123,8 +120,11 @@ async def generate_llm_response(state: GraphState):
 
     context = f"Conversation History:\n{history_context}\n\nRelevant Documents:\n{documents_context} "
 
-    answer = await generateAnswer(context, state["user_query"])
-    return {"llmResponse": answer}
+    async def stream_answer():
+        async for chunk in generateAnswer(context, state["user_query"]):
+            yield chunk
+
+    return {"llmResponse": stream_answer()}
 
 
 #  conditional edge node
@@ -161,6 +161,7 @@ async def rewrite_query(state: GraphState):
         # "relevant_docs": [],
     }
 
+
 def ask_clarification(state: GraphState):
     return {
         "clarification_needed": True,
@@ -169,6 +170,7 @@ def ask_clarification(state: GraphState):
             "Could you provide more details about your question?",
         ),
     }
+
 
 #  workflow
 agent_builder = StateGraph(GraphState)
