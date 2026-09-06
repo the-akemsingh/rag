@@ -16,18 +16,17 @@ const demoChats: Chat[] = [
 export function ProductDemo() {
   return (
     <GradientFrame>
-      <div className="flex h-[420px] min-w-0">
+      <div className="flex h-[70vh] min-w-0">
         <WorkspaceSidebar
           userName="Maya Alvarez"
           userEmail="maya@acme.com"
           chats={demoChats}
           activeChatId="1"
           demo
-          forceDesktop
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <WorkspacePageHeader title="Chats" subtitle="3 chats · 7 documents" forceDesktop />
-          <div className="min-h-0 flex-1 overflow-hidden">
+          <div className="min-h-0 flex-1 overflow-y-auto">
             <ChatDashboardBody userName="Maya" chats={demoChats} demo />
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Paperclip, Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 import { StatusDot, WorkspacePageHeader, useWorkspace } from "@/components/app/app-shell";
 import { useChatSocket } from "@/hooks/use-chat-socket";
@@ -284,13 +285,34 @@ function Bubble({
         ) : null}
         <div
           className={cn(
-            "whitespace-pre-wrap text-[13.5px] leading-relaxed",
+            "text-[13.5px] leading-relaxed",
             isUser
-              ? "rounded-2xl bg-ink px-3.5 py-2 text-surface"
-              : "text-ink/85",
+              ? "whitespace-pre-wrap rounded-2xl bg-ink px-3.5 py-2 text-surface"
+              : "text-ink/85 [&_h1]:mb-3 [&_h1]:text-base [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:mt-4 [&_h2]:text-[15px] [&_h2]:font-semibold [&_h3]:mb-2 [&_h3]:mt-3 [&_h3]:font-semibold [&_li]:my-1 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5",
           )}
         >
-          {content}
+          {isUser ? (
+            content
+          ) : (
+            <ReactMarkdown
+              components={{
+                code: ({ className, children }) =>
+                  className ? (
+                    <code
+                      className="my-2 block overflow-x-auto rounded-lg bg-ink/[0.06] p-3 text-[12px]"
+                    >
+                      {children}
+                    </code>
+                  ) : (
+                    <code className="rounded bg-ink/[0.06] px-1 py-0.5 text-[12px]">
+                      {children}
+                    </code>
+                  ),
+              }}
+            >
+              {content}
+            </ReactMarkdown>
+          )}
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { FileText, MessageSquare, Upload } from "lucide-react";
 
 import { StatusDot } from "@/components/app/app-shell";
 import type { Chat } from "@/types/api";
+import { Link } from "@tanstack/react-router";
 
 /**
  * Chat-list dashboard body. Pure props, so the landing page can render the
@@ -53,16 +54,18 @@ export function ChatDashboardBody({
         ) : (
           <ul>
             {chats.map((chat) => (
-              <li
+              <Link
                 key={chat.id}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 hover:bg-ink/[0.04]"
+                to="/chat/$chatId"
+                params={{ chatId: chat.id }}
+                className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 hover:bg-ink/[0.04]"
               >
                 <StatusDot tone="info" />
                 <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink/80">
                   {chat.title ?? "Untitled chat"}
                 </span>
                 <MessageSquare className="size-3.5 text-ink/25" />
-              </li>
+              </Link>
             ))}
           </ul>
         )}
@@ -73,7 +76,7 @@ export function ChatDashboardBody({
           <button
             type="button"
             onClick={onNewChat}
-            className="inline-flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-surface hover:bg-ink/90"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-surface hover:bg-ink/90"
           >
             <FileText className="size-3.5" />
             New chat

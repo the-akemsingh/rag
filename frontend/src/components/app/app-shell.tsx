@@ -54,7 +54,7 @@ export function PillButton({
     <button
       {...props}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center cursor-pointer justify-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50",
         variant === "solid"
           ? "bg-ink text-surface hover:bg-ink/90"
           : "border border-ink/[0.12] bg-surface-raised text-ink/80 hover:bg-ink/[0.04]",
@@ -93,6 +93,7 @@ export function WorkspaceSidebar({
   onDeleteChat,
   demo = false,
   forceDesktop = false,
+  className,
 }: SidebarData & {
   userName: string;
   userEmail?: string;
@@ -100,6 +101,7 @@ export function WorkspaceSidebar({
   onDeleteChat?: (chatId: string) => void;
   demo?: boolean;
   forceDesktop?: boolean;
+  className?: string;
 }) {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
 
@@ -108,6 +110,7 @@ export function WorkspaceSidebar({
       className={cn(
         "w-[232px] shrink-0 flex-col border-r border-ink/[0.07] bg-rail px-3 py-3.5",
         forceDesktop ? "flex" : "hidden lg:flex",
+        className,
       )}
     >
       <div className="flex items-center justify-between px-1">
@@ -121,7 +124,7 @@ export function WorkspaceSidebar({
         <button
           type="button"
           onClick={() => !demo && onNewChat?.()}
-          className="flex w-full items-center gap-2 rounded-lg border border-ink/[0.09] bg-surface-raised px-2.5 py-2 text-left text-[12.5px] font-medium text-ink/80 transition-colors hover:bg-ink/[0.04]"
+          className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-ink/[0.09] bg-surface-raised px-2.5 py-2 text-left text-[12.5px] font-medium text-ink/80 transition-colors hover:bg-ink/[0.04]"
         >
           <Plus className="size-3.5" />
           New chat
@@ -199,7 +202,7 @@ export function WorkspaceSidebar({
             <div className="my-1 h-px bg-ink/[0.07]" />
             <button
               type="button"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-ink/60 hover:bg-ink/[0.06] hover:text-ink"
+              className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-ink/60 hover:bg-ink/[0.06] hover:text-ink"
             >
               <Settings2 className="size-3.5" />
               Settings
@@ -207,7 +210,7 @@ export function WorkspaceSidebar({
             <button
               type="button"
               onClick={() => !demo && clearSession()}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-ink/60 hover:bg-ink/[0.06] hover:text-ink"
+              className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-[12px] text-ink/60 hover:bg-ink/[0.06] hover:text-ink"
             >
               <LogOut className="size-3.5" />
               Sign out
@@ -220,7 +223,7 @@ export function WorkspaceSidebar({
           type="button"
           onClick={() => setAccountMenuOpen((open) => !open)}
           aria-expanded={accountMenuOpen}
-          className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-ink/[0.06]"
+          className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-ink/[0.06]"
         >
           <span className="flex size-5 items-center justify-center rounded-full bg-ink/[0.08] text-[10px] font-semibold text-ink/60">
             {userName.slice(0, 1).toUpperCase()}
@@ -348,9 +351,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <WorkspaceContext.Provider value={value}>
-      <div className="flex min-h-screen bg-surface">
-        <WorkspaceSidebar {...sidebarProps} />
-        <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex h-screen overflow-hidden bg-surface">
+        <WorkspaceSidebar {...sidebarProps} className="sticky top-0 h-screen" />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="lg:hidden">
             <WorkspacePageHeader
               title="AskDocs"
