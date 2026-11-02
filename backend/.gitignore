@@ -1,5 +1,13 @@
-node_modules
-.env
-dist
-.next
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+.vscode
+
+# Virtual environments
 .venv
+.env
