@@ -10,74 +10,77 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as WorkspaceRouteImport } from './routes/_workspace'
-import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as WorkspaceChatIndexRouteImport } from './routes/_workspace/chat.index'
-import { Route as WorkspaceChatChatIdRouteImport } from './routes/_workspace/chat.$chatId'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as SigninRouteImport } from './routes/signin'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardChatChatIdRouteImport } from './routes/dashboard.chat.$chatId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspaceRoute = WorkspaceRouteImport.update({
-  id: '/_workspace',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SignInRoute = SignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspaceChatIndexRoute = WorkspaceChatIndexRouteImport.update({
-  id: '/chat/',
-  path: '/chat/',
-  getParentRoute: () => WorkspaceRoute,
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
 } as any)
-const WorkspaceChatChatIdRoute = WorkspaceChatChatIdRouteImport.update({
+const DashboardChatChatIdRoute = DashboardChatChatIdRouteImport.update({
   id: '/chat/$chatId',
   path: '/chat/$chatId',
-  getParentRoute: () => WorkspaceRoute,
+  getParentRoute: () => DashboardRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/sign-in': typeof SignInRoute
-  '/chat/$chatId': typeof WorkspaceChatChatIdRoute
-  '/chat/': typeof WorkspaceChatIndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/signin': typeof SigninRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/chat/$chatId': typeof DashboardChatChatIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/sign-in': typeof SignInRoute
-  '/chat/$chatId': typeof WorkspaceChatChatIdRoute
-  '/chat': typeof WorkspaceChatIndexRoute
+  '/signin': typeof SigninRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/chat/$chatId': typeof DashboardChatChatIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_workspace': typeof WorkspaceRouteWithChildren
-  '/sign-in': typeof SignInRoute
-  '/_workspace/chat/$chatId': typeof WorkspaceChatChatIdRoute
-  '/_workspace/chat/': typeof WorkspaceChatIndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/signin': typeof SigninRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/chat/$chatId': typeof DashboardChatChatIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/chat/$chatId' | '/chat/'
+  fullPaths:
+    '/' | '/dashboard' | '/signin' | '/dashboard/' | '/dashboard/chat/$chatId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-in' | '/chat/$chatId' | '/chat'
+  to: '/' | '/signin' | '/dashboard' | '/dashboard/chat/$chatId'
   id:
     | '__root__'
     | '/'
-    | '/_workspace'
-    | '/sign-in'
-    | '/_workspace/chat/$chatId'
-    | '/_workspace/chat/'
+    | '/dashboard'
+    | '/signin'
+    | '/dashboard/'
+    | '/dashboard/chat/$chatId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  WorkspaceRoute: typeof WorkspaceRouteWithChildren
-  SignInRoute: typeof SignInRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
+  SigninRoute: typeof SigninRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -89,55 +92,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_workspace': {
-      id: '/_workspace'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof WorkspaceRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_workspace/chat/': {
-      id: '/_workspace/chat/'
-      path: '/chat'
-      fullPath: '/chat/'
-      preLoaderRoute: typeof WorkspaceChatIndexRouteImport
-      parentRoute: typeof WorkspaceRoute
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/_workspace/chat/$chatId': {
-      id: '/_workspace/chat/$chatId'
+    '/dashboard/chat/$chatId': {
+      id: '/dashboard/chat/$chatId'
       path: '/chat/$chatId'
-      fullPath: '/chat/$chatId'
-      preLoaderRoute: typeof WorkspaceChatChatIdRouteImport
-      parentRoute: typeof WorkspaceRoute
+      fullPath: '/dashboard/chat/$chatId'
+      preLoaderRoute: typeof DashboardChatChatIdRouteImport
+      parentRoute: typeof DashboardRoute
     }
   }
 }
 
-interface WorkspaceRouteChildren {
-  WorkspaceChatChatIdRoute: typeof WorkspaceChatChatIdRoute
-  WorkspaceChatIndexRoute: typeof WorkspaceChatIndexRoute
+interface DashboardRouteChildren {
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardChatChatIdRoute: typeof DashboardChatChatIdRoute
 }
 
-const WorkspaceRouteChildren: WorkspaceRouteChildren = {
-  WorkspaceChatChatIdRoute: WorkspaceChatChatIdRoute,
-  WorkspaceChatIndexRoute: WorkspaceChatIndexRoute,
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardChatChatIdRoute: DashboardChatChatIdRoute,
 }
 
-const WorkspaceRouteWithChildren = WorkspaceRoute._addFileChildren(
-  WorkspaceRouteChildren,
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  WorkspaceRoute: WorkspaceRouteWithChildren,
-  SignInRoute: SignInRoute,
+  DashboardRoute: DashboardRouteWithChildren,
+  SigninRoute: SigninRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

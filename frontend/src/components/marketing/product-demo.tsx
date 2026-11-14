@@ -1,6 +1,6 @@
 import { WorkspacePageHeader, WorkspaceSidebar } from "@/components/app/app-shell";
 import { ChatDashboardBody } from "@/components/app/chat-dashboard-body";
-import { GradientFrame } from "@/components/landing/gradient-frame";
+import { GradientFrame } from "@/components/marketing/gradient-frame";
 import type { Chat } from "@/types/api";
 
 const demoChats: Chat[] = [

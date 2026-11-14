@@ -1,5 +1,25 @@
 # Document Q&A
 
+## Deployment
+
+This repository contains the shared AskDocs UI. Deploy it as two Vercel projects
+using the same frontend source:
+
+- **Marketing project** (`askdocs.com`): set `VITE_APP_URL` to the application
+  deployment URL. The public homepage is `/`, and its Get started, Sign up,
+  and Sign in CTAs point to `${VITE_APP_URL}/signin`.
+- **Application project** (`app.askdocs.com`): set `VITE_APP_URL` to its own
+  URL, plus the backend, WebSocket, and Google Identity Services variables.
+  The authenticated dashboard is `/dashboard`, and authentication is
+  `/signin`.
+
+The app uses Vite, so the public equivalent of a Next.js
+`NEXT_PUBLIC_APP_URL` variable is `VITE_APP_URL`. Do not hardcode either
+deployment hostname. If `VITE_APP_URL` is omitted, marketing CTAs safely use
+the local `/signin` route, which is useful for a single-host local deployment.
+Copy `.env.example` to `.env` for local development and provide real values
+through each Vercel project's Environment Variables settings.
+
 # Frontend Build Prompt — RAG Document Chat App
 
 Paste this whole document into your frontend AI coding tool (Claude Code, Cursor, v0, Lovable, etc.) as the build brief.
@@ -162,12 +182,12 @@ The reference doesn't screenshot the product for the hero. It renders the **actu
 3. Wrap the composed demo in a gradient "device frame" component purely for decoration.
 
 ```tsx
-// components/landing/product-demo.tsx
+// components/marketing/product-demo.tsx
 "use client";
 
 import { WorkspaceSidebar, WorkspacePageHeader } from "@/components/app/app-shell";
 import { ChatDashboardBody } from "@/components/app/chat-dashboard-body";
-import { GradientFrame } from "@/components/landing/gradient-frame";
+import { GradientFrame } from "@/components/marketing/gradient-frame";
 
 const demoChats = [
   { id: "1", title: "Q3 board deck questions", created_at: "2026-08-20T10:00:00Z" },
@@ -223,7 +243,7 @@ Do this instead of a static `` screenshot — it's the whole point of the patter
 
 One `AppShell` client component, mounted once in `app/(workspace)/layout.tsx`, responsible for:
 
-- Redirecting to `/sign-in?next=` when there's no session
+- Redirecting to `/signin?next=` when there's no session
 - Loading the chat list once per session (cache by user id, the way the reference guards `checkingUser` against re-fetch loops)
 - Rendering a desktop sidebar (`lg:flex`, hidden below that) and a separate mobile drawer triggered from a compact header — don't try to make one sidebar responsive, keep them as two components sharing the same `nav`/`chats` data like the reference does
 - A single source-of-truth array for sidebar sections (Chats list + "New chat" action + Settings/Sign out), so the desktop rail, mobile drawer, and any command palette all read from the same list instead of duplicating it three times — this is the actual value of the reference's `nav` array pattern, independent of which links you put in it
@@ -239,7 +259,7 @@ Sidebar sections for this app (adapt freely, this replaces the reference's conne
 | Route | Purpose |
 |---|---|
 | `/` | Landing page (§3) |
-| `/sign-in` | Google sign-in button only |
+| `/signin` | Google sign-in button only |
 | `/chat` | Chat list + empty state ("upload a document to start") |
 | `/chat/[chatId]` | Message thread + composer + document upload zone |
 
@@ -508,7 +528,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isPending && !session?.user) {
-      router.push(`/sign-in?next=${encodeURIComponent(pathname)}`);
+      router.push(`/signin?next=${encodeURIComponent(pathname)}`);
     }
   }, [isPending, session, router, pathname]);
 

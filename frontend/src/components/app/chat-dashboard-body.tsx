@@ -29,11 +29,7 @@ export function ChatDashboardBody({
       </p>
 
       <div className="mt-5 space-y-2">
-        <Step
-          n={1}
-          title="Start a chat"
-          hint="Each chat keeps its own documents and history."
-        />
+        <Step n={1} title="Start a chat" hint="Each chat keeps its own documents and history." />
         <Step
           n={2}
           title="Upload your files"
@@ -56,7 +52,7 @@ export function ChatDashboardBody({
             {chats.map((chat) => (
               <Link
                 key={chat.id}
-                to="/chat/$chatId"
+                to="/dashboard/chat/$chatId"
                 params={{ chatId: chat.id }}
                 className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 hover:bg-ink/[0.04]"
               >

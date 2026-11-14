@@ -9,7 +9,7 @@ import { getMessages, uploadDocuments } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { DocumentStatus, Message } from "@/types/api";
 
-export const Route = createFileRoute("/_workspace/chat/$chatId")({
+export const Route = createFileRoute("/dashboard/chat/$chatId")({
   head: () => ({
     meta: [
       { title: "Document chat — AskDocs" },
@@ -66,10 +66,7 @@ function ChatThread() {
     void load();
   }, [load]);
 
-  const documents = useMemo(
-    () => messages.filter((m) => m.role === "document"),
-    [messages],
-  );
+  const documents = useMemo(() => messages.filter((m) => m.role === "document"), [messages]);
   const hasDocument = documents.length > 0;
   const hasIndexed = documents.some((d) => d.status === "indexed");
   const stillProcessing = documents.some(
@@ -87,11 +84,7 @@ function ChatThread() {
     void load();
   }, [load]);
 
-  const { send, turn, clearTurn, connectionError } = useChatSocket(
-    chatId,
-    hasDocument,
-    onSettled,
-  );
+  const { send, turn, clearTurn, connectionError } = useChatSocket(chatId, hasDocument, onSettled);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -146,12 +139,9 @@ function ChatThread() {
 
           {!loading && !hasDocument ? (
             <div className="rounded-2xl border border-dashed border-ink/[0.14] bg-surface-raised px-5 py-8 text-center">
-              <p className="text-[13px] font-medium text-ink/80">
-                Upload a document to start
-              </p>
+              <p className="text-[13px] font-medium text-ink/80">Upload a document to start</p>
               <p className="mx-auto mt-1.5 max-w-sm text-[11.5px] text-ink/45">
-                PDF, DOCX, XLSX, PPTX, TXT or CSV. Once it's indexed you can ask questions
-                about it.
+                PDF, DOCX, XLSX, PPTX, TXT or CSV. Once it's indexed you can ask questions about it.
               </p>
             </div>
           ) : null}
@@ -194,9 +184,7 @@ function ChatThread() {
               {connectionError}
             </p>
           ) : null}
-          {uploadError ? (
-            <p className="text-[12px] text-status-bad">{uploadError}</p>
-          ) : null}
+          {uploadError ? <p className="text-[12px] text-status-bad">{uploadError}</p> : null}
           <div ref={bottomRef} />
         </div>
       </div>
@@ -298,9 +286,7 @@ function Bubble({
               components={{
                 code: ({ className, children }) =>
                   className ? (
-                    <code
-                      className="my-2 block overflow-x-auto rounded-lg bg-ink/[0.06] p-3 text-[12px]"
-                    >
+                    <code className="my-2 block overflow-x-auto rounded-lg bg-ink/[0.06] p-3 text-[12px]">
                       {children}
                     </code>
                   ) : (

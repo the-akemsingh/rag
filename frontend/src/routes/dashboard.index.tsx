@@ -4,7 +4,7 @@ import { WorkspacePageHeader, useWorkspace } from "@/components/app/app-shell";
 import { ChatDashboardBody } from "@/components/app/chat-dashboard-body";
 import { useSession } from "@/lib/session";
 
-export const Route = createFileRoute("/_workspace/chat/")({
+export const Route = createFileRoute("/dashboard/")({
   head: () => ({
     meta: [
       { title: "Your chats — AskDocs" },

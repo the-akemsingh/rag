@@ -1,5 +1,13 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FileText, LogOut, Menu, MessageSquare, Plus, Settings2, Trash2, X } from "lucide-react";
 
 import { createChat, listChats, relativeTime, signOut as clearSession } from "@/lib/api";
@@ -166,7 +174,7 @@ export function WorkspaceSidebar({
                     <div className="flex min-w-0 flex-1 items-center gap-2">{row}</div>
                   ) : (
                     <Link
-                      to="/chat/$chatId"
+                      to="/dashboard/chat/$chatId"
                       params={{ chatId: chat.id }}
                       className="flex min-w-0 flex-1 items-center gap-2"
                     >
@@ -195,9 +203,7 @@ export function WorkspaceSidebar({
           <div className="absolute bottom-full left-0 mb-2 w-full rounded-xl border border-ink/[0.08] bg-surface-raised p-1.5 shadow-panel">
             <div className="px-2 py-1.5">
               <p className="truncate text-[12px] font-medium text-ink/90">{userName}</p>
-              {userEmail ? (
-                <p className="truncate text-[11px] text-ink/40">{userEmail}</p>
-              ) : null}
+              {userEmail ? <p className="truncate text-[11px] text-ink/40">{userEmail}</p> : null}
             </div>
             <div className="my-1 h-px bg-ink/[0.07]" />
             <button
@@ -272,7 +278,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isPending } = useSession();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const activeChatId = pathname.startsWith("/chat/") ? (pathname.split("/")[2] ?? null) : null;
+  const activeChatId = pathname.startsWith("/dashboard/chat/")
+    ? (pathname.split("/")[3] ?? null)
+    : null;
 
   const [chats, setChats] = useState<Chat[]>([]);
   const [loadingChats, setLoadingChats] = useState(true);
@@ -284,7 +292,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isPending && !user) {
       void navigate({
-        to: "/",
+        to: "/signin",
         search: { next: entryPath.current },
         replace: true,
       });
@@ -315,13 +323,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     const next = await listChats();
     setChats(next);
     const created = next.find((c) => !before.has(c.id)) ?? next[0];
-    if (created) void navigate({ to: "/chat/$chatId", params: { chatId: created.id } });
+    if (created) {
+      void navigate({ to: "/dashboard/chat/$chatId", params: { chatId: created.id } });
+    }
   }, [chats, navigate]);
 
   const onDeleteChat = useCallback(
     async (chatId: string) => {
       await deleteAndRefresh(chatId, refreshChats);
-      if (activeChatId === chatId) void navigate({ to: "/chat" });
+      if (activeChatId === chatId) void navigate({ to: "/dashboard" });
     },
     [refreshChats, activeChatId, navigate],
   );

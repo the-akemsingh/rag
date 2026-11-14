@@ -25,9 +25,12 @@ declare global {
   }
 }
 
-export const Route = createFileRoute("/sign-in")({
+export const Route = createFileRoute("/signin")({
   validateSearch: (search: Record<string, unknown>) => ({
-    next: typeof search["next"] === "string" ? (search["next"] as string) : "/chat",
+    next:
+      typeof search["next"] === "string" && search["next"].startsWith("/dashboard")
+        ? search["next"]
+        : "/dashboard",
   }),
   head: () => ({
     meta: [
@@ -54,7 +57,9 @@ function SignIn() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (user) void navigate({ to: next as "/chat", replace: true });
+    if (user) {
+      void navigate({ to: next as "/dashboard", replace: true });
+    }
   }, [user, next, navigate]);
 
   useEffect(() => {
@@ -69,7 +74,7 @@ function SignIn() {
           }
           setBusy(true);
           loginWithGoogle(response.credential)
-            .then(() => navigate({ to: next as "/chat", replace: true }))
+            .then(() => navigate({ to: next as "/dashboard", replace: true }))
             .catch((err: unknown) => {
               setError(err instanceof Error ? err.message : "Sign-in failed");
             })
